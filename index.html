@@ -824,12 +824,8 @@
     <link rel="canonical" href="https://cinelove.me/template/thiep-cuoi-52" data-next-head="">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
-    <link rel="stylesheet"
-        href="/e9b34d6568b4a120.css"
-        data-n-g="">
-    <link rel="stylesheet"
-        href="/3a12fbab90cd8589.css"
-        data-n-p="">
+    <link rel="stylesheet" href="/e9b34d6568b4a120.css" data-n-g="">
+    <link rel="stylesheet" href="/3a12fbab90cd8589.css" data-n-p="">
     <style id="__jsx-3522513885">
         #audio-control-wrapper.jsx-3522513885 {
             position: absolute;
@@ -5284,7 +5280,8 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <a href="https://maps.app.goo.gl/3Ac41QokkLiH2EWy5" target="_blank" data-node-id="XtrIRpJztl" class="jsx-1828971989 text-box-component "
+                                    <a href="https://maps.app.goo.gl/3Ac41QokkLiH2EWy5" target="_blank"
+                                        data-node-id="XtrIRpJztl" class="jsx-1828971989 text-box-component "
                                         style="position: absolute; top: 2631.31px; left: 11.61px; width: 399.642px; height: auto; z-index: 26; cursor: pointer; transform: rotate(0deg);">
                                         <div data-transition-key="XtrIRpJztl-fade-in-1.6-0.5-ease-out-false"
                                             data-node-id="XtrIRpJztl"
@@ -5310,8 +5307,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <a href="https://maps.app.goo.gl/DH87fqMo5KAqiMsw6" target="_blank" data-node-id="XtrIRpJztl" class="jsx-1828971989 text-box-component "
+
+                                    <a href="https://maps.app.goo.gl/DH87fqMo5KAqiMsw6" target="_blank"
+                                        data-node-id="XtrIRpJztl" class="jsx-1828971989 text-box-component "
                                         style="position: absolute; top: 2731.31px; left: 11.61px; width: 399.642px; height: auto; z-index: 26; cursor: pointer; transform: rotate(0deg);">
                                         <div data-transition-key="XtrIRpJztl-fade-in-1.6-0.5-ease-out-false"
                                             data-node-id="XtrIRpJztl"
@@ -5918,19 +5916,77 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 
     <script>
+        let autoScrollId = null;
+        let userInteracting = false;
+        let resumeTimer = null;
+
+        const SCROLL_SPEED = 0.3; // px mỗi frame
+        const RESUME_DELAY = 30000; // 30s
+
+        function startAutoScroll() {
+            if (autoScrollId) return;
+
+            function step() {
+                if (userInteracting) {
+                    autoScrollId = null;
+                    return;
+                }
+
+                window.scrollBy(0, SCROLL_SPEED);
+
+                // chạm đáy thì dừng
+                if (window.innerHeight + window.scrollY >= document.body.scrollHeight) {
+                    autoScrollId = null;
+                    return;
+                }
+
+                autoScrollId = requestAnimationFrame(step);
+            }
+
+            autoScrollId = requestAnimationFrame(step);
+        }
+
+        function stopAutoScroll() {
+            if (autoScrollId) {
+                cancelAnimationFrame(autoScrollId);
+                autoScrollId = null;
+            }
+        }
+
+        function onUserInteract() {
+            userInteracting = true;
+            stopAutoScroll();
+
+            clearTimeout(resumeTimer);
+            resumeTimer = setTimeout(() => {
+                userInteracting = false;
+                startAutoScroll();
+            }, RESUME_DELAY);
+        }
+
+        // Bắt mọi thao tác người dùng
+        ['wheel', 'touchstart', 'touchmove', 'keydown', 'mousedown'].forEach(evt => {
+            window.addEventListener(evt, onUserInteract, { passive: true });
+        });
+
+        // Khi mở thiệp
         document.getElementById('openBtn').addEventListener('click', function () {
             const cover = document.getElementById('cover');
-
             cover.classList.add('open');
 
             setTimeout(() => {
                 cover.style.display = 'none';
+
                 const audio = $('#musical')[0];
                 audio.volume = 0.5;
                 audio.play().catch(() => { });
+
+                // bắt đầu auto scroll
+                startAutoScroll();
             }, 1000);
         });
     </script>
+
 
     <script>
         // Lấy query parameter 'guest' từ URL và gắn vào element có id 'guest'
